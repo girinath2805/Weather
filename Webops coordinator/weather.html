@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Temperature Archive</title>
+  </head>
+  <body>
+    <h1>Temperature Archive</h1>
+    <label for="date">Select a date:</label>
+    <select id="date"></select>
+    <p id="temperature"></p>
+
+    <script>
+      const apiUrl =
+        "https://archive-api.open-meteo.com/v1/archive?latitude=52.52&longitude=13.41&start_date=2023-04-10&end_date=2023-04-15&daily=temperature_2m_max&timezone=GMT";
+
+      const dateSelect = document.getElementById("date");
+      const temperatureDisplay = document.getElementById("temperature");
+
+      async function fetchData() {
+        try {
+          const response = await fetch(apiUrl);
+          const data = await response.json();
+          const dates = data.daily.time;
+          dates.forEach((date) => {
+            const option = document.createElement("option");
+            option.value = date;
+            option.text = date;
+            dateSelect.add(option);
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      function displayTemperature() {
+        const selectedDate = dateSelect.value;
+        const temperatureData = fetch(apiUrl)
+          .then((response) => response.json())
+          .then((data) => {
+            const index = data.daily.time.indexOf(selectedDate);
+            const temperature = data.daily.temperature_2m_max[index];
+            temperatureDisplay.textContent = `Temperature for ${selectedDate}: ${temperature} °C`;
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+
+      fetchData();
+
+      dateSelect.addEventListener("change", displayTemperature);
+    </script>
+  </body>
+</html>
